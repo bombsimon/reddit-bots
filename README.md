@@ -2,7 +2,7 @@
 
 This is a place where I can store concepts and ideas or even live bots used on
 Reddit. It's also much appreciated with pull requests in any form or language
-which is some kind of new or improved feature for a Reddit bot.
+with some kind of new or improved feature for a Reddit bot.
 
 ## Authentication
 
