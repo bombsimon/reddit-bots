@@ -4,3 +4,5 @@ client_secret: client-secret
 username: myUsername
 password: myPassword
 useragent: unique-user-agent
+
+# vim: set ft=yaml sw=2 ts=2 et:
