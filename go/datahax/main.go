@@ -36,7 +36,7 @@ type RedditSettings struct {
 
 func main() {
 	var (
-		redditSettings  = kingpin.Flag("reddit-settings", "YAML file for Reddit settings").Default("../auth.yml").String()
+		redditSettings  = kingpin.Flag("reddit-settings", "YAML file for Reddit settings").Default("../../auth.yml").String()
 		discordSettings = kingpin.Flag("discord-settings", "YAML file for Discord settings").Default("discord.yml").String()
 	)
 

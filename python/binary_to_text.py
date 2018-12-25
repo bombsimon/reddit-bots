@@ -24,7 +24,7 @@ class BinaryToText:
                 username=credentials['username']
                 )
 
-    def read_credentials(self, auth_file='auth.yml'):
+    def read_credentials(self, auth_file='../auth.yml'):
         """
         Read the YAML file with credentials and return a dictionary to use for
         authentication.
