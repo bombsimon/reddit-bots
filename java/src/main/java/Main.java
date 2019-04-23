@@ -3,17 +3,16 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Map;
 import javax.security.auth.login.LoginException;
+import net.dean.jraw.RedditClient;
+import net.dean.jraw.http.OkHttpNetworkAdapter;
+import net.dean.jraw.http.UserAgent;
+import net.dean.jraw.oauth.Credentials;
+import net.dean.jraw.oauth.OAuthHelper;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.entities.ChannelType;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.yaml.snakeyaml.Yaml;
 
-public class Main extends ListenerAdapter {
+public class Main {
   /**
    * This is the main program that will run the bot.
    *
@@ -21,47 +20,39 @@ public class Main extends ListenerAdapter {
    * @throws LoginException Exception thrown when failing to login
    */
   public static void main(String[] args) throws LoginException {
-    Map<String,String> credentials = getCredentials("../discord.yml.ignore");
+    // Load discord and reddit auth configuration.
+    Map<String,String> discordCredentials = getCredentials("../discord.yml.ignore");
+    Map<String,String> redditCredentials = getCredentials("../auth.yml.ignore");
 
-    JDA jda = new JDABuilder(credentials.get("token")).build();
-    jda.addEventListener(new Main());
+    // Create OAuth2 credentials for reddit.
+    Credentials oauthCreds = Credentials.script(
+            redditCredentials.get("username"),
+            redditCredentials.get("password"),
+            redditCredentials.get("client_id"),
+            redditCredentials.get("client_secret")
+    );
 
+    // Create a custom User-Agent.
+    UserAgent userAgent = new UserAgent(
+            "bot",
+            "datahax",
+            "0.0.1",
+            redditCredentials.get("username")
+    );
+
+    // Create a Reddit client.
+    RedditClient reddit = OAuthHelper.automatic(new OkHttpNetworkAdapter(userAgent), oauthCreds);
+
+    // Create a discord client and register the Datahax class as event listener.
+    JDA jda = new JDABuilder(discordCredentials.get("token")).build();
+    jda.addEventListener(new Datahax(reddit));
   }
 
   /**
-   * This method will get every event from Discord.
-   *
-   * @param event Each event from Discord.
+   * Get configuration from yaml files and return  a map of strings.
+   * @param filePath The path of the file
+   * @return A map of strings from the yaml file.
    */
-  @Override
-  public void onMessageReceived(MessageReceivedEvent event) {
-    User author = event.getAuthor();
-    Message message = event.getMessage();
-    MessageChannel channel = event.getChannel();
-    String msg = message.getContentDisplay();
-
-    // Ignore bots.
-    if (author.isBot()) {
-      return;
-    }
-
-    // Log but don't handle private messages.
-    if (event.isFromType(ChannelType.PRIVATE)) {
-      System.out.printf("[PM] %s: %s\n", event.getAuthor().getName(),
-              event.getMessage().getContentDisplay());
-
-      return;
-    }
-
-    System.out.printf("[%s][%s] %s: %s\n", event.getGuild().getName(),
-            event.getTextChannel().getName(), event.getMember().getEffectiveName(),
-            msg);
-
-    if (msg.equals("!ping")) {
-      channel.sendMessage("pong from Java!").queue();
-    }
-  }
-
   private static Map<String, String> getCredentials(String filePath) {
     Yaml yaml = new Yaml();
     InputStream inputStream;
