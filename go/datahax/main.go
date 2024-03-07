@@ -13,7 +13,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/turnage/graw/reddit"
 
-	kingpin "gopkg.in/alecthomas/kingpin.v2"
+	kingpin "github.com/alecthomas/kingpin/v2"
 	yaml "gopkg.in/yaml.v2"
 )
 
